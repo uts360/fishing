@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fiskeprojekt">
+<title>Fiskeprojekt – Svartån</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080f1e;
+  --bg2: #0d1a30;
+  --bg3: #112040;
+  --surface: #142248;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #e8edf5;
+  --text2: #8fa3c0;
+  --text3: #4d6480;
+  --accent: #3b82f6;
+  --accent2: #60a5fa;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --teal: #14b8a6;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 0%, rgba(59,130,246,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 100%, rgba(20,184,166,0.08) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; padding-bottom: 90px; }
+
+/* Header */
+header {
+  padding: 52px 20px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+.logo { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+.logo span { color: var(--accent2); }
+.location-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 5px 10px;
+}
+
+/* Weather strip */
+.weather-strip {
+  margin: 0 16px 16px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+}
+.w-item {
+  text-align: center;
+  padding: 4px 0;
+  border-right: 0.5px solid var(--border);
+}
+.w-item:last-child { border-right: none; }
+.w-label { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.w-val { font-size: 17px; font-weight: 700; color: var(--text); }
+.w-sub { font-size: 10px; color: var(--text2); margin-top: 2px; }
+
+/* Section label */
+.section-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text3);
+  padding: 0 20px;
+  margin-bottom: 10px;
+}
+
+/* Rec card */
+.rec-card {
+  margin: 0 16px 16px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.rec-header {
+  padding: 14px 16px;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid var(--border);
+}
+.rec-title { font-size: 13px; font-weight: 700; }
+.baro-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: rgba(59,130,246,0.15);
+  color: var(--accent2);
+  border: 0.5px solid rgba(59,130,246,0.3);
+}
+.rec-body { padding: 14px 16px; }
+.rec-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.rec-row:last-child { border-bottom: none; }
+.rec-key { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; width: 80px; flex-shrink: 0; padding-top: 1px; }
+.rec-val { font-size: 13px; color: var(--text); font-weight: 500; flex: 1; line-height: 1.4; }
+.color-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 20px;
+  padding: 3px 10px 3px 6px;
+  font-size: 12px;
+  margin: 2px 4px 2px 0;
+}
+.color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+/* Pressure bar */
+.pressure-track {
+  height: 4px;
+  background: var(--bg3);
+  border-radius: 2px;
+  margin: 12px 0 4px;
+  overflow: hidden;
+}
+.pressure-fill { height: 100%; border-radius: 2px; background: var(--accent); transition: width 0.8s ease; }
+.pressure-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+/* Nav */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: rgba(8,15,30,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 0.5px solid var(--border2);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--text3);
+  font-family: 'Syne', sans-serif;
+  font-size: 10px;
+  transition: color 0.2s;
+}
+.nav-btn.active { color: var(--accent2); }
+.nav-icon { font-size: 20px; line-height: 1; }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Log form */
+.form-card {
+  margin: 0 16px 16px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.form-header {
+  padding: 14px 16px;
+  background: var(--bg3);
+  font-size: 13px;
+  font-weight: 700;
+  border-bottom: 0.5px solid var(--border);
+}
+.form-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; }
+.fg input, .fg select, .fg textarea {
+  background: var(--bg3);
+  border: 0.5px solid var(--border2);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  padding: 10px 12px;
+  width: 100%;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.fg select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234d6480' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+.fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--accent); }
+.fg textarea { resize: vertical; min-height: 70px; line-height: 1.5; }
+.save-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.save-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+/* History */
+.catch-item {
+  margin: 0 16px 10px;
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+}
+.catch-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.catch-art { font-size: 16px; font-weight: 800; }
+.catch-meta { font-size: 11px; color: var(--text3); font-family: 'DM Mono', monospace; }
+.catch-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.tag {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 0.5px solid var(--border2);
+  color: var(--text2);
+}
+.tag-green { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: var(--green); }
+.tag-blue { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: var(--accent2); }
+.catch-note { font-size: 12px; color: var(--text2); line-height: 1.5; margin-top: 4px; }
+.del-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.del-btn:hover { background: rgba(239,68,68,0.1); color: var(--red); }
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 0 16px 16px;
+}
+.stat-card {
+  background: var(--bg2);
+  border: 0.5px solid var(--border2);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.stat-label { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+.stat-val { font-size: 24px; font-weight: 800; }
+.stat-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text3);
+}
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 14px; line-height: 1.6; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--green);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 20px;
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--surface) 50%, var(--bg3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  height: 20px;
+}
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+/* Offline banner */
+.offline-banner {
+  background: rgba(245,158,11,0.15);
+  border: 0.5px solid rgba(245,158,11,0.3);
+  color: var(--amber);
+  font-size: 12px;
+  text-align: center;
+  padding: 8px;
+  display: none;
+}
+.offline-banner.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="offline-banner" id="offline-banner">Offline – visar cachad data</div>
+
+<div class="app">
+
+<!-- PAGE: AKTUELLT -->
+<div class="page active" id="page-home">
+  <header>
+    <div class="logo">Fiske<span>projektet</span></div>
+    <div class="location-pill">Svartån · Västerås</div>
+  </header>
+
+  <div class="section-label">Väder just nu</div>
+  <div class="weather-strip">
+    <div class="w-item">
+      <div class="w-label">Luft</div>
+      <div class="w-val" id="w-air">–</div>
+      <div class="w-sub">°C</div>
+    </div>
+    <div class="w-item">
+      <div class="w-label">Vatten</div>
+      <div class="w-val" id="w-water">–</div>
+      <div class="w-sub">°C est.</div>
+    </div>
+    <div class="w-item">
+      <div class="w-label">Tryck</div>
+      <div class="w-val" id="w-pressure">–</div>
+      <div class="w-sub">hPa</div>
+    </div>
+    <div class="w-item">
+      <div class="w-label">Vind</div>
+      <div class="w-val" id="w-wind">–</div>
+      <div class="w-sub" id="w-winddir">m/s</div>
+    </div>
+  </div>
+
+  <div class="section-label">Rekommendationer</div>
+  <div class="rec-card">
+    <div class="rec-header">
+      <span class="rec-title" id="rec-title">Laddar...</span>
+      <span class="baro-badge" id="rec-baro">–</span>
+    </div>
+    <div class="rec-body">
+      <div class="rec-row">
+        <span class="rec-key">Färger</span>
+        <span class="rec-val" id="rec-colors">–</span>
+      </div>
+      <div class="rec-row">
+        <span class="rec-key">Drag</span>
+        <span class="rec-val" id="rec-drag">–</span>
+      </div>
+      <div class="rec-row">
+        <span class="rec-key">Teknik</span>
+        <span class="rec-val" id="rec-teknik">–</span>
+      </div>
+      <div class="rec-row">
+        <span class="rec-key">Bäst tid</span>
+        <span class="rec-val" id="rec-tid">–</span>
+      </div>
+      <div class="pressure-track">
+        <div class="pressure-fill" id="pressure-fill" style="width:0%"></div>
+      </div>
+      <div class="pressure-labels">
+        <span>Dåligt</span>
+        <span>Fiskebarometer</span>
+        <span>Bra</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">Senaste fångst</div>
+  <div id="latest-catch">
+    <div class="empty-state" style="padding: 20px;">
+      <div class="empty-text" style="color:var(--text3)">Inga fångster loggade ännu</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: LOGGA -->
+<div class="page" id="page-log">
+  <header>
+    <div class="logo">Logga <span>fångst</span></div>
+  </header>
+
+  <div class="form-card">
+    <div class="form-header">Ny fångst</div>
+    <div class="form-body">
+      <div class="form-row">
+        <div class="fg">
+          <label>Art</label>
+          <select id="f-art">
+            <option>Abborre</option>
+            <option>Gädda</option>
+            <option>Gös</option>
+            <option>Mört</option>
+            <option>Lake</option>
+            <option>Annan</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Plats</label>
+          <input type="text" id="f-plats" placeholder="t.ex. Bron">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Vikt (g)</label>
+          <input type="number" id="f-vikt" placeholder="350" inputmode="numeric">
+        </div>
+        <div class="fg">
+          <label>Längd (cm)</label>
+          <input type="number" id="f-langd" placeholder="32" inputmode="numeric">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Drag/bete</label>
+          <select id="f-bete">
+            <option>Jig + twister</option>
+            <option>Spinner</option>
+            <option>Wobbler</option>
+            <option>Gäddsug</option>
+            <option>Mask</option>
+            <option>Rapala</option>
+            <option>Annan</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Färg</label>
+          <select id="f-farg">
+            <option>Chartreuse/gul</option>
+            <option>Orange</option>
+            <option>Vit/silver</option>
+            <option>Röd/orange</option>
+            <option>Svart</option>
+            <option>Naturlig/grön</option>
+            <option>Rosa</option>
+            <option>Blå/vit</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Teknik</label>
+        <select id="f-teknik">
+          <option>Bottendrag / jig längs botten</option>
+          <option>Twitch / ryck</option>
+          <option>Steady retrieve</option>
+          <option>Jiggning vertikalt</option>
+          <option>Flöterfiske</option>
+          <option>Casting mot vassbryn</option>
+          <option>Topplug / ytfiske</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Anteckningar</label>
+        <textarea id="f-notes" placeholder="Vad funkade? Var stod fisken? Väder?"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="fg">
+          <label>Datum</label>
+          <input type="date" id="f-datum">
+        </div>
+        <div class="fg">
+          <label>Tid</label>
+          <input type="time" id="f-tid">
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveCatch()">Spara fångst</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: HISTORIK -->
+<div class="page" id="page-history">
+  <header>
+    <div class="logo">Historik <span>&</span> stats</div>
+  </header>
+
+  <div class="stats-grid" id="stats-grid" style="display:none">
+    <div class="stat-card">
+      <div class="stat-label">Totalt</div>
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-sub">fångster</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Snittsvikt</div>
+      <div class="stat-val" id="stat-avg">–</div>
+      <div class="stat-sub">gram</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bästa färg</div>
+      <div class="stat-val" id="stat-color" style="font-size:14px;padding-top:4px;">–</div>
+      <div class="stat-sub" id="stat-color-sub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Bästa drag</div>
+      <div class="stat-val" id="stat-bete" style="font-size:14px;padding-top:4px;">–</div>
+      <div class="stat-sub" id="stat-bete-sub"></div>
+    </div>
+  </div>
+
+  <div class="section-label">Alla fångster</div>
+  <div id="catch-list">
+    <div class="empty-state">
+      <div class="empty-icon">🎣</div>
+      <div class="empty-text">Inga fångster loggade ännu.<br>Dags att ut och fiska!</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- Nav -->
+<nav>
+  <button class="nav-btn active" id="nav-home" onclick="showPage('home')">
+    <span class="nav-icon">🌊</span>
+    Aktuellt
+  </button>
+  <button class="nav-btn" id="nav-log" onclick="showPage('log')">
+    <span class="nav-icon">🎣</span>
+    Logga
+  </button>
+  <button class="nav-btn" id="nav-history" onclick="showPage('history')">
+    <span class="nav-icon">📊</span>
+    Historik
+  </button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'fiskeprojekt_v2';
+
+function getCatches() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+function saveCatches(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('nav-' + name).classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'home') renderLatest();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function colorHex(name) {
+  const m = { 'Chartreuse/gul': '#a3e635', 'Orange': '#f97316', 'Vit/silver': '#94a3b8', 'Röd/orange': '#ef4444', 'Svart': '#374151', 'Naturlig/grön': '#4ade80', 'Rosa': '#f472b6', 'Blå/vit': '#60a5fa' };
+  return m[name] || '#888';
+}
+
+function colorChip(name) {
+  return `<span class="color-chip"><span class="color-dot" style="background:${colorHex(name)}"></span>${name}</span>`;
+}
+
+function getRecommendations(airTemp, pressure) {
+  const wt = Math.round((airTemp * 0.68 + 3.5) * 10) / 10;
+  document.getElementById('w-water').textContent = wt.toFixed(1);
+
+  let title, colors, drag, teknik, tid;
+
+  if (wt < 4) {
+    title = 'Kallt vatten – trögfiske';
+    colors = ['Vit/silver', 'Chartreuse/gul'];
+    drag = 'Liten jig 2–3g, extremt långsamt';
+    teknik = 'Fiska nära botten, minimal rörelse. Fisken är nästan orörlig.';
+    tid = 'Mitt på dagen när vatten är varmast';
+  } else if (wt < 8) {
+    title = 'Våruppvak – abborre vaknar';
+    colors = ['Chartreuse/gul', 'Orange'];
+    drag = 'Jig 3–5g med twister, Mepps #1';
+    teknik = 'Variera tempo – prova långsamt sedan snabbt. Abborre börjar jaga.';
+    tid = 'Förmiddag och kväll';
+  } else if (wt < 13) {
+    title = 'Bra fisketemperatur';
+    colors = ['Orange', 'Naturlig/grön'];
+    drag = 'Spinner, wobbler, jig 5–10g';
+    teknik = 'Steady retrieve med pauser. Gädda aktiv längs vassbryn.';
+    tid = 'Morgon 06–09, kväll 17–20';
+  } else if (wt < 18) {
+    title = 'Topptemperatur – fullt driv';
+    colors = ['Naturlig/grön', 'Blå/vit'];
+    drag = 'Wobbler, gäddsug, topplug';
+    teknik = 'Ytfiske och snabba retrieves. Fisken jagar aktivt.';
+    tid = 'Tidig morgon och sen kväll';
+  } else {
+    title = 'Sommarvärme – ytfiske';
+    colors = ['Blå/vit', 'Vit/silver'];
+    drag = 'Topplug, ytwobbler, skum-frog';
+    teknik = 'Fiska tidigt morgon eller sent kväll. Mitt på dagen svårt.';
+    tid = 'Soluppgång och solnedgång';
+  }
+
+  let baroText, baroScore;
+  if (pressure > 1022) { baroText = 'Högtryck'; baroScore = 85; }
+  else if (pressure > 1015) { baroText = 'Stabilt'; baroScore = 70; }
+  else if (pressure > 1008) { baroText = 'Normalt'; baroScore = 50; }
+  else if (pressure > 1000) { baroText = 'Lågtryck'; baroScore = 30; }
+  else { baroText = 'Stormlåg'; baroScore = 10; }
+
+  document.getElementById('rec-title').textContent = title;
+  document.getElementById('rec-baro').textContent = baroText;
+  document.getElementById('rec-colors').innerHTML = colors.map(colorChip).join('');
+  document.getElementById('rec-drag').textContent = drag;
+  document.getElementById('rec-teknik').textContent = teknik;
+  document.getElementById('rec-tid').textContent = tid;
+  document.getElementById('pressure-fill').style.width = baroScore + '%';
+}
+
+async function fetchWeather() {
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=59.61&longitude=16.54&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m&wind_speed_unit=ms&timezone=Europe/Stockholm');
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    const c = d.current;
+    const temp = Math.round(c.temperature_2m * 10) / 10;
+    const pressure = Math.round(c.surface_pressure);
+    const wind = Math.round(c.wind_speed_10m * 10) / 10;
+    const dirs = ['N','NNO','NO','ONO','O','OSO','SO','SSO','S','SSV','SV','VSV','V','VNV','NV','NNV'];
+    const dir = dirs[Math.round(c.wind_direction_10m / 22.5) % 16];
+
+    document.getElementById('w-air').textContent = temp.toFixed(1);
+    document.getElementById('w-pressure').textContent = pressure;
+    document.getElementById('w-wind').textContent = wind.toFixed(1);
+    document.getElementById('w-winddir').textContent = dir;
+
+    localStorage.setItem('fiske_weather_cache', JSON.stringify({ temp, pressure, wind, dir, ts: Date.now() }));
+    getRecommendations(temp, pressure);
+  } catch {
+    const cache = JSON.parse(localStorage.getItem('fiske_weather_cache') || 'null');
+    if (cache) {
+      document.getElementById('w-air').textContent = cache.temp.toFixed(1);
+      document.getElementById('w-pressure').textContent = cache.pressure;
+      document.getElementById('w-wind').textContent = cache.wind.toFixed(1);
+      document.getElementById('w-winddir').textContent = cache.dir;
+      getRecommendations(cache.temp, cache.pressure);
+      document.getElementById('offline-banner').classList.add('show');
+    }
+  }
+}
+
+function setDefaults() {
+  const now = new Date();
+  document.getElementById('f-datum').value = now.toISOString().slice(0, 10);
+  document.getElementById('f-tid').value = now.toTimeString().slice(0, 5);
+}
+
+function saveCatch() {
+  const art = document.getElementById('f-art').value;
+  const c = {
+    id: Date.now(),
+    art,
+    plats: document.getElementById('f-plats').value,
+    vikt: document.getElementById('f-vikt').value,
+    langd: document.getElementById('f-langd').value,
+    bete: document.getElementById('f-bete').value,
+    farg: document.getElementById('f-farg').value,
+    teknik: document.getElementById('f-teknik').value,
+    notes: document.getElementById('f-notes').value,
+    datum: document.getElementById('f-datum').value,
+    tid: document.getElementById('f-tid').value,
+    airTemp: document.getElementById('w-air').textContent,
+    waterTemp: document.getElementById('w-water').textContent,
+    pressure: document.getElementById('w-pressure').textContent,
+  };
+  const catches = getCatches();
+  catches.unshift(c);
+  saveCatches(catches);
+  document.getElementById('f-vikt').value = '';
+  document.getElementById('f-langd').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-plats').value = '';
+  showToast('Fångst sparad! 🐟');
+  renderLatest();
+}
+
+function renderLatest() {
+  const catches = getCatches();
+  const el = document.getElementById('latest-catch');
+  if (!catches.length) {
+    el.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="empty-text" style="color:var(--text3)">Inga fångster loggade ännu</div></div>';
+    return;
+  }
+  const c = catches[0];
+  el.innerHTML = renderCatchItem(c, false);
+}
+
+function renderCatchItem(c, showDel = true) {
+  return `<div class="catch-item">
+    ${showDel ? `<button class="del-btn" onclick="deleteCatch(${c.id})">×</button>` : ''}
+    <div class="catch-top">
+      <div class="catch-art">${c.art}</div>
+      <div class="catch-meta">${c.datum} ${c.tid}${c.plats ? ' · ' + c.plats : ''}</div>
+    </div>
+    <div class="catch-stats">
+      ${c.vikt ? `<span class="tag tag-green">${c.vikt}g</span>` : ''}
+      ${c.langd ? `<span class="tag tag-blue">${c.langd}cm</span>` : ''}
+      <span class="tag">${c.bete}</span>
+      <span class="color-chip" style="border-radius:20px;background:var(--bg3);border:0.5px solid var(--border2);padding:2px 8px;font-size:11px;font-family:'DM Mono',monospace;"><span class="color-dot" style="background:${colorHex(c.farg)};width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px;vertical-align:middle;"></span>${c.farg}</span>
+    </div>
+    <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:${c.notes ? '6px' : '0'}">
+      ${c.teknik} · Luft ${c.airTemp}°C · Vatten ${c.waterTemp}°C
+    </div>
+    ${c.notes ? `<div class="catch-note">${c.notes}</div>` : ''}
+  </div>`;
+}
+
+function deleteCatch(id) {
+  if (!confirm('Ta bort fångsten?')) return;
+  saveCatches(getCatches().filter(c => c.id !== id));
+  renderHistory();
+  renderLatest();
+}
+
+function renderHistory() {
+  const catches = getCatches();
+  const listEl = document.getElementById('catch-list');
+  const statsGrid = document.getElementById('stats-grid');
+
+  if (!catches.length) {
+    listEl.innerHTML = `<div class="empty-state"><div class="empty-icon">🎣</div><div class="empty-text">Inga fångster loggade ännu.<br>Dags att ut och fiska!</div></div>`;
+    statsGrid.style.display = 'none';
+    return;
+  }
+
+  statsGrid.style.display = 'grid';
+  listEl.innerHTML = catches.map(c => renderCatchItem(c, true)).join('');
+
+  const withWeight = catches.filter(c => c.vikt && !isNaN(c.vikt));
+  const avg = withWeight.length ? Math.round(withWeight.reduce((s, c) => s + Number(c.vikt), 0) / withWeight.length) : null;
+
+  const colorCount = {}, beteCount = {};
+  catches.forEach(c => {
+    colorCount[c.farg] = (colorCount[c.farg] || 0) + 1;
+    beteCount[c.bete] = (beteCount[c.bete] || 0) + 1;
+  });
+  const topColor = Object.entries(colorCount).sort((a, b) => b[1] - a[1])[0];
+  const topBete = Object.entries(beteCount).sort((a, b) => b[1] - a[1])[0];
+
+  document.getElementById('stat-total').textContent = catches.length;
+  document.getElementById('stat-avg').textContent = avg ? avg : '–';
+  document.getElementById('stat-color').innerHTML = topColor ? `<span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:50%;background:${colorHex(topColor[0])};display:inline-block;flex-shrink:0"></span>${topColor[0]}</span>` : '–';
+  document.getElementById('stat-color-sub').textContent = topColor ? topColor[1] + ' fångster' : '';
+  document.getElementById('stat-bete').textContent = topBete ? topBete[0] : '–';
+  document.getElementById('stat-bete-sub').textContent = topBete ? topBete[1] + ' fångster' : '';
+}
+
+window.addEventListener('online', () => document.getElementById('offline-banner').classList.remove('show'));
+window.addEventListener('offline', () => document.getElementById('offline-banner').classList.add('show'));
+
+fetchWeather();
+setDefaults();
+renderLatest();
+</script>
+</body>
+</html>
